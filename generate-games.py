@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 """
 Generate games.json from your local game folders.
-Can be run from anywhere - just provide the path to your game folders.
+Handles nested folder structures automatically.
 
 Usage:
-    python3 generate-games.py
-    
-    Or with a custom path:
     python3 generate-games.py "C:\Users\corby\Downloads\Gn math"
 """
 
@@ -15,15 +12,42 @@ import json
 import sys
 from pathlib import Path
 
+def find_files_in_nested_folder(parent_dir, extension=""):
+    """
+    Find all files in a folder, handling nested structures.
+    Returns a dict of {filename_stem: full_path}
+    """
+    parent_dir = Path(parent_dir)
+    files = {}
+    
+    # First, check if files are directly in this folder
+    if parent_dir.exists():
+        if extension:
+            pattern = f"*{extension}"
+        else:
+            pattern = "*"
+        
+        direct_files = list(parent_dir.glob(pattern))
+        if direct_files:
+            for f in direct_files:
+                if f.is_file():
+                    files[f.stem] = f
+        
+        # If no direct files, check nested folders (one level deep)
+        if not files:
+            for subfolder in parent_dir.iterdir():
+                if subfolder.is_dir():
+                    nested_files = list(subfolder.glob(pattern))
+                    for f in nested_files:
+                        if f.is_file():
+                            files[f.stem] = f
+    
+    return files
+
 def generate_games_json(base_path=".", output_file="games.json"):
     """
     Scan the game folders and generate games.json
-    
-    Expected folder structure:
-    base_path/
-    ├── html-main/
-    ├── covers-main/
-    └── assets-main/
+    Handles both flat and nested folder structures.
     """
     
     base_path = Path(base_path).resolve()
@@ -38,40 +62,54 @@ def generate_games_json(base_path=".", output_file="games.json"):
         print(f"❌ Error: {html_dir} not found!")
         return False
     
-    games = []
-    
-    # Get all HTML files and extract game numbers
-    html_files = sorted([f.stem for f in html_dir.glob("*.html")])
+    # Find HTML files (handling nested structure)
+    html_files = find_files_in_nested_folder(html_dir, ".html")
     print(f"🎮 Found {len(html_files)} HTML files")
     
-    for html_name in html_files:
+    if len(html_files) == 0:
+        print(f"❌ No HTML files found in {html_dir}")
+        print(f"   Checked: direct files and one level of subfolders")
+        return False
+    
+    # Find covers (handling nested structure)
+    covers_files = find_files_in_nested_folder(covers_dir, ".png")
+    print(f"🖼️  Found {len(covers_files)} cover images")
+    
+    # Find assets folders
+    assets_folders = {}
+    if assets_dir.exists():
+        for item in assets_dir.rglob("*"):
+            if item.is_dir() and item.name.isdigit():
+                assets_folders[item.name] = item
+    print(f"📦 Found {len(assets_folders)} asset folders")
+    
+    games = []
+    
+    # Process each HTML file
+    for html_stem in sorted(html_files.keys()):
         try:
-            game_num = int(html_name)
+            game_num = int(html_stem)
         except ValueError:
-            # Skip non-numeric files like "9.html" vs "9-f.html"
+            # Skip non-numeric files
             continue
         
         # Build the game object
         game = {
             "id": game_num,
-            "name": f"Game {game_num}",  # Default name
+            "name": f"Game {game_num}",
             "html": f"https://your-cdn.com/html-main/{game_num}.html",
             "cover": f"https://your-cdn.com/covers-main/{game_num}.png",
             "assets": f"https://your-cdn.com/assets-main/{game_num}/",
+            "hasCover": False,
             "hasAssets": False
         }
         
         # Check if cover exists
-        cover_file = covers_dir / f"{game_num}.png"
-        if cover_file.exists():
-            game["cover"] = f"https://your-cdn.com/covers-main/{game_num}.png"
+        if str(game_num) in covers_files:
             game["hasCover"] = True
-        else:
-            game["hasCover"] = False
         
         # Check if assets folder exists
-        assets_folder = assets_dir / str(game_num)
-        if assets_folder.exists() and assets_folder.is_dir():
+        if str(game_num) in assets_folders:
             game["hasAssets"] = True
         
         games.append(game)
@@ -86,11 +124,20 @@ def generate_games_json(base_path=".", output_file="games.json"):
     
     print(f"\n✅ Generated {output_file} with {len(games)} games")
     print(f"📁 File saved to: {output_path}")
-    print("\n⚠️  NEXT STEPS:")
-    print("   1. Replace 'https://your-cdn.com' with your actual CDN URL")
-    print("   2. Upload html-main/, covers-main/, assets-main/ to your CDN")
-    print("   3. Run this script again to update the URLs")
-    print("\n🌐 CDN Options: Netlify, Vercel, AWS S3, Cloudinary, or GitHub Releases")
+    
+    # Print summary
+    games_with_covers = sum(1 for g in games if g["hasCover"])
+    games_with_assets = sum(1 for g in games if g["hasAssets"])
+    print(f"\n📊 Summary:")
+    print(f"   Total games: {len(games)}")
+    print(f"   With covers: {games_with_covers}")
+    print(f"   With assets: {games_with_assets}")
+    
+    print(f"\n⚠️  NEXT STEPS:")
+    print(f"   1. Replace 'https://your-cdn.com' with your actual CDN URL")
+    print(f"   2. Upload html-main/, covers-main/, assets-main/ to your CDN")
+    print(f"   3. Update the URLs in {output_file}")
+    print(f"\n🌐 CDN Options: Netlify, Vercel, AWS S3, Cloudinary, or GitHub Releases")
     
     return True
 
