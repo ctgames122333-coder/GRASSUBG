@@ -194,7 +194,7 @@
 
       function showToast(text){
         let t = document.getElementById('grass-games-toast');
-        if(!t){ t = document.createElement('div'); t.id = 'grass-games-toast'; t.style.position='fixed'; t.style.left='50%'; t.style.bottom='24px'; t.style.transform='translateX(-50%)'; t.style.background='rgba(54,38,58,.96)'; t.style.color='#fff'; t.style.padding='10px 16px'; t.style.borderRadius='8px'; t.style.fontWeight='700'; t.style.zIndex='100000'; document.body.appendChild(t); }
+        if(!t){ t = document.createElement('div'); t.id = 'grass-games-toast'; t.style.position='fixed'; t.style.left='50%'; t.style.bottom='24px'; t.style.transform='translateX(-50%)'; t.style.b[...]
         t.textContent = text; t.style.opacity = '1'; setTimeout(()=> t.style.opacity='0', 1800);
       }
 
@@ -213,6 +213,22 @@
       // initial load
       fetchGames().then(renderGames);
     })();
+    </script>
+
+    <!-- Ensure IXL is the default entrance and both entrances display correctly -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function(){
+        try{
+          const ixl = document.getElementById('entrance-ixl');
+          const blooket = document.getElementById('entrance-blooket');
+          if(ixl) ixl.classList.add('active');
+          if(blooket) blooket.classList.remove('active');
+          document.body.setAttribute('data-disguise', 'ixl');
+          const sel = document.getElementById('modal-cloak-select');
+          if(sel) sel.value = 'ixl';
+          try{ localStorage.setItem('grass_entrance', 'ixl'); }catch(e){}
+        }catch(e){ console.error('Entrance defaulting failed', e); }
+      });
     </script>
 
 </body>
