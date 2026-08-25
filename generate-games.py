@@ -4,7 +4,7 @@ Generate games.json from your local game folders.
 Handles nested folder structures and various file naming patterns.
 
 Usage:
-    python3 generate-games.py "C:\Users\corby\Downloads\Gn math"
+    python3 generate-games.py "C:/Users/corby/Downloads/Gn math"
 """
 
 import os
@@ -34,30 +34,56 @@ def extract_game_number(filename):
     
     return None
 
-def find_files_in_nested_folder(parent_dir, extension=""):
+def find_files_recursive(parent_dir, extension=".html"):
     """
-    Find all files in a folder, handling nested structures.
+    Recursively find all files with the given extension.
     Returns a dict of {game_number: full_path}
     """
-    parent_dir = Path(parent_dir)
+    parent_dir = Path(parent_dir).resolve()
     files = {}
     
-    # Search recursively for files with the given extension
-    if parent_dir.exists():
-        if extension:
-            pattern = f"**/*{extension}"
-        else:
-            pattern = "**/*"
-        
-        for file_path in parent_dir.glob(pattern):
-            if file_path.is_file():
-                game_num = extract_game_number(file_path.name)
-                if game_num is not None:
-                    # If duplicate number, keep the first one
-                    if game_num not in files:
-                        files[game_num] = file_path
+    print(f"   Scanning: {parent_dir}")
+    
+    if not parent_dir.exists():
+        print(f"   ❌ Directory does not exist: {parent_dir}")
+        return files
+    
+    # Recursively find all files with the extension
+    for file_path in parent_dir.rglob(f"*{extension}"):
+        if file_path.is_file():
+            game_num = extract_game_number(file_path.name)
+            if game_num is not None:
+                # If duplicate number, keep the first one
+                if game_num not in files:
+                    files[game_num] = file_path
     
     return files
+
+def find_asset_folders(parent_dir):
+    """
+    Find all numbered asset folders.
+    Returns a dict of {game_number: folder_path}
+    """
+    parent_dir = Path(parent_dir).resolve()
+    folders = {}
+    
+    print(f"   Scanning: {parent_dir}")
+    
+    if not parent_dir.exists():
+        print(f"   ❌ Directory does not exist: {parent_dir}")
+        return folders
+    
+    # Find all folders with numeric names
+    for item in parent_dir.rglob("*"):
+        if item.is_dir():
+            try:
+                folder_num = int(item.name)
+                if folder_num not in folders:
+                    folders[folder_num] = item
+            except ValueError:
+                pass
+    
+    return folders
 
 def generate_games_json(base_path=".", output_file="games.json"):
     """
@@ -66,7 +92,7 @@ def generate_games_json(base_path=".", output_file="games.json"):
     """
     
     base_path = Path(base_path).resolve()
-    print(f"📂 Scanning: {base_path}")
+    print(f"📂 Base path: {base_path}")
     
     html_dir = base_path / "html-main"
     covers_dir = base_path / "covers-main"
@@ -77,29 +103,21 @@ def generate_games_json(base_path=".", output_file="games.json"):
         print(f"❌ Error: {html_dir} not found!")
         return False
     
-    # Find HTML files (handling nested structure and various naming)
-    html_files = find_files_in_nested_folder(html_dir, ".html")
-    print(f"🎮 Found {len(html_files)} HTML files")
+    print(f"\n🎮 Searching for HTML files...")
+    html_files = find_files_recursive(html_dir, ".html")
+    print(f"   ✅ Found {len(html_files)} HTML files")
     
     if len(html_files) == 0:
-        print(f"❌ No HTML files found in {html_dir}")
+        print(f"❌ No HTML files found!")
         return False
     
-    # Find covers (handling nested structure)
-    covers_files = find_files_in_nested_folder(covers_dir, ".png")
-    print(f"🖼️  Found {len(covers_files)} cover images")
+    print(f"\n🖼️  Searching for cover images...")
+    covers_files = find_files_recursive(covers_dir, ".png")
+    print(f"   ✅ Found {len(covers_files)} cover images")
     
-    # Find assets folders
-    assets_folders = {}
-    if assets_dir.exists():
-        for item in assets_dir.rglob("*"):
-            if item.is_dir():
-                try:
-                    folder_num = int(item.name)
-                    assets_folders[folder_num] = item
-                except ValueError:
-                    pass
-    print(f"📦 Found {len(assets_folders)} asset folders")
+    print(f"\n📦 Searching for asset folders...")
+    assets_folders = find_asset_folders(assets_dir)
+    print(f"   ✅ Found {len(assets_folders)} asset folders")
     
     games = []
     
@@ -112,21 +130,13 @@ def generate_games_json(base_path=".", output_file="games.json"):
             "html": f"https://your-cdn.com/html-main/{game_num}.html",
             "cover": f"https://your-cdn.com/covers-main/{game_num}.png",
             "assets": f"https://your-cdn.com/assets-main/{game_num}/",
-            "hasCover": False,
-            "hasAssets": False
+            "hasCover": game_num in covers_files,
+            "hasAssets": game_num in assets_folders
         }
-        
-        # Check if cover exists
-        if game_num in covers_files:
-            game["hasCover"] = True
-        
-        # Check if assets folder exists
-        if game_num in assets_folders:
-            game["hasAssets"] = True
         
         games.append(game)
     
-    # Write to JSON file
+    # Write to JSON file in the base_path
     output_path = base_path / output_file
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(games, f, indent=2, ensure_ascii=False)
@@ -141,7 +151,8 @@ def generate_games_json(base_path=".", output_file="games.json"):
     print(f"   Total games: {len(games)}")
     print(f"   With covers: {games_with_covers}")
     print(f"   With assets: {games_with_assets}")
-    print(f"   Game ID range: {games[0]['id']} - {games[-1]['id']}")
+    if games:
+        print(f"   Game ID range: {games[0]['id']} - {games[-1]['id']}")
     
     print(f"\n⚠️  NEXT STEPS:")
     print(f"   1. Replace 'https://your-cdn.com' with your actual CDN URL")
@@ -158,4 +169,5 @@ if __name__ == "__main__":
     else:
         base_path = "."
     
-    generate_games_json(base_path)
+    success = generate_games_json(base_path)
+    sys.exit(0 if success else 1)
