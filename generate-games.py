@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Generate games.json from your local game folders.
-Handles nested folder structures automatically.
+Handles nested folder structures and various file naming patterns.
 
 Usage:
     python3 generate-games.py "C:\Users\corby\Downloads\Gn math"
@@ -10,44 +10,59 @@ Usage:
 import os
 import json
 import sys
+import re
 from pathlib import Path
+
+def extract_game_number(filename):
+    """
+    Extract the game number from filenames like:
+    - 0.html -> 0
+    - 1-fde.html -> 1
+    - 10.html -> 10
+    - 100-f.html -> 100
+    - 101.html -> 101
+    
+    Returns the number or None if it can't be extracted
+    """
+    # Remove extension
+    name = Path(filename).stem
+    
+    # Try to extract leading digits
+    match = re.match(r'^(\d+)', name)
+    if match:
+        return int(match.group(1))
+    
+    return None
 
 def find_files_in_nested_folder(parent_dir, extension=""):
     """
     Find all files in a folder, handling nested structures.
-    Returns a dict of {filename_stem: full_path}
+    Returns a dict of {game_number: full_path}
     """
     parent_dir = Path(parent_dir)
     files = {}
     
-    # First, check if files are directly in this folder
+    # Search recursively for files with the given extension
     if parent_dir.exists():
         if extension:
-            pattern = f"*{extension}"
+            pattern = f"**/*{extension}"
         else:
-            pattern = "*"
+            pattern = "**/*"
         
-        direct_files = list(parent_dir.glob(pattern))
-        if direct_files:
-            for f in direct_files:
-                if f.is_file():
-                    files[f.stem] = f
-        
-        # If no direct files, check nested folders (one level deep)
-        if not files:
-            for subfolder in parent_dir.iterdir():
-                if subfolder.is_dir():
-                    nested_files = list(subfolder.glob(pattern))
-                    for f in nested_files:
-                        if f.is_file():
-                            files[f.stem] = f
+        for file_path in parent_dir.glob(pattern):
+            if file_path.is_file():
+                game_num = extract_game_number(file_path.name)
+                if game_num is not None:
+                    # If duplicate number, keep the first one
+                    if game_num not in files:
+                        files[game_num] = file_path
     
     return files
 
 def generate_games_json(base_path=".", output_file="games.json"):
     """
     Scan the game folders and generate games.json
-    Handles both flat and nested folder structures.
+    Handles nested structures and various naming patterns.
     """
     
     base_path = Path(base_path).resolve()
@@ -62,13 +77,12 @@ def generate_games_json(base_path=".", output_file="games.json"):
         print(f"❌ Error: {html_dir} not found!")
         return False
     
-    # Find HTML files (handling nested structure)
+    # Find HTML files (handling nested structure and various naming)
     html_files = find_files_in_nested_folder(html_dir, ".html")
     print(f"🎮 Found {len(html_files)} HTML files")
     
     if len(html_files) == 0:
         print(f"❌ No HTML files found in {html_dir}")
-        print(f"   Checked: direct files and one level of subfolders")
         return False
     
     # Find covers (handling nested structure)
@@ -79,20 +93,18 @@ def generate_games_json(base_path=".", output_file="games.json"):
     assets_folders = {}
     if assets_dir.exists():
         for item in assets_dir.rglob("*"):
-            if item.is_dir() and item.name.isdigit():
-                assets_folders[item.name] = item
+            if item.is_dir():
+                try:
+                    folder_num = int(item.name)
+                    assets_folders[folder_num] = item
+                except ValueError:
+                    pass
     print(f"📦 Found {len(assets_folders)} asset folders")
     
     games = []
     
     # Process each HTML file
-    for html_stem in sorted(html_files.keys()):
-        try:
-            game_num = int(html_stem)
-        except ValueError:
-            # Skip non-numeric files
-            continue
-        
+    for game_num in sorted(html_files.keys()):
         # Build the game object
         game = {
             "id": game_num,
@@ -105,17 +117,14 @@ def generate_games_json(base_path=".", output_file="games.json"):
         }
         
         # Check if cover exists
-        if str(game_num) in covers_files:
+        if game_num in covers_files:
             game["hasCover"] = True
         
         # Check if assets folder exists
-        if str(game_num) in assets_folders:
+        if game_num in assets_folders:
             game["hasAssets"] = True
         
         games.append(game)
-    
-    # Sort by ID
-    games.sort(key=lambda x: x["id"])
     
     # Write to JSON file
     output_path = base_path / output_file
@@ -132,6 +141,7 @@ def generate_games_json(base_path=".", output_file="games.json"):
     print(f"   Total games: {len(games)}")
     print(f"   With covers: {games_with_covers}")
     print(f"   With assets: {games_with_assets}")
+    print(f"   Game ID range: {games[0]['id']} - {games[-1]['id']}")
     
     print(f"\n⚠️  NEXT STEPS:")
     print(f"   1. Replace 'https://your-cdn.com' with your actual CDN URL")
