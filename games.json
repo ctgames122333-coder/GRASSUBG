@@ -1,0 +1,92 @@
+[
+  {
+    "id": 0,
+    "name": "Game 0",
+    "html": "https://jolly-kangaroo-911b90.netlify.app/html-main/0.html",
+    "cover": "https://jolly-kangaroo-911b90.netlify.app/covers-main/0.png",
+    "assets": "https://jolly-kangaroo-911b90.netlify.app/assets-main/0/",
+    "hasCover": true,
+    "hasAssets": false
+  },
+  {
+    "id": 1,
+    "name": "Game 1",
+    "html": "https://jolly-kangaroo-911b90.netlify.app/html-main/1.html",
+    "cover": "https://jolly-kangaroo-911b90.netlify.app/covers-main/1.png",
+    "assets": "https://jolly-kangaroo-911b90.netlify.app/assets-main/1/",
+    "hasCover": true,
+    "hasAssets": false
+  },
+  {
+    "id": 2,
+    "name": "Game 2",
+    "html": "https://jolly-kangaroo-911b90.netlify.app/html-main/2.html",
+    "cover": "https://jolly-kangaroo-911b90.netlify.app/covers-main/2.png",
+    "assets": "https://jolly-kangaroo-911b90.netlify.app/assets-main/2/",
+    "hasCover": true,
+    "hasAssets": false
+  },
+  {
+    "id": 3,
+    "name": "Game 3",
+    "html": "https://jolly-kangaroo-911b90.netlify.app/html-main/3.html",
+    "cover": "https://jolly-kangaroo-911b90.netlify.app/covers-main/3.png",
+    "assets": "https://jolly-kangaroo-911b90.netlify.app/assets-main/3/",
+    "hasCover": true,
+    "hasAssets": false
+  },
+  {
+    "id": 4,
+    "name": "Game 4",
+    "html": "https://jolly-kangaroo-911b90.netlify.app/html-main/4.html",
+    "cover": "https://jolly-kangaroo-911b90.netlify.app/covers-main/4.png",
+    "assets": "https://jolly-kangaroo-911b90.netlify.app/assets-main/4/",
+    "hasCover": true,
+    "hasAssets": false
+  },
+  {
+    "id": 5,
+    "name": "Game 5",
+    "html": "https://jolly-kangaroo-911b90.netlify.app/html-main/5.html",
+    "cover": "https://jolly-kangaroo-911b90.netlify.app/covers-main/5.png",
+    "assets": "https://jolly-kangaroo-911b90.netlify.app/assets-main/5/",
+    "hasCover": true,
+    "hasAssets": false
+  },
+  {
+    "id": 6,
+    "name": "Game 6",
+    "html": "https://jolly-kangaroo-911b90.netlify.app/html-main/6.html",
+    "cover": "https://jolly-kangaroo-911b90.netlify.app/covers-main/6.png",
+    "assets": "https://jolly-kangaroo-911b90.netlify.app/assets-main/6/",
+    "hasCover": true,
+    "hasAssets": false
+  },
+  {
+    "id": 7,
+    "name": "Game 7",
+    "html": "https://jolly-kangaroo-911b90.netlify.app/html-main/7.html",
+    "cover": "https://jolly-kangaroo-911b90.netlify.app/covers-main/7.png",
+    "assets": "https://jolly-kangaroo-911b90.netlify.app/assets-main/7/",
+    "hasCover": true,
+    "hasAssets": false
+  },
+  {
+    "id": 9,
+    "name": "Game 9",
+    "html": "https://jolly-kangaroo-911b90.netlify.app/html-main/9.html",
+    "cover": "https://jolly-kangaroo-911b90.netlify.app/covers-main/9.png",
+    "assets": "https://jolly-kangaroo-911b90.netlify.app/assets-main/9/",
+    "hasCover": true,
+    "hasAssets": false
+  },
+  {
+    "id": 10,
+    "name": "Game 10",
+    "html": "https://jolly-kangaroo-911b90.netlify.app/html-main/10.html",
+    "cover": "https://jolly-kangaroo-911b90.netlify.app/covers-main/10.png",
+    "assets": "https://jolly-kangaroo-911b90.netlify.app/assets-main/10/",
+    "hasCover": true,
+    "hasAssets": false
+  }
+]
