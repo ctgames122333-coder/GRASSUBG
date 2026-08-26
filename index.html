@@ -993,7 +993,12 @@
                     <button class="close-game-btn" onclick="closeGame()"><i class="fa-solid fa-xmark"></i> Close</button>
                 </div>
             </div>
-            <iframe id="game-iframe" src="" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
+            <div id="game-load-status" class="game-load-status">
+                <div class="gv-spinner"></div>
+                <div class="gv-loading-title">Loading game</div>
+                <div class="gv-loading-sub">Preparing the game…</div>
+            </div>
+            <iframe id="game-iframe" src="about:blank" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
         </div>
     </div>
 
@@ -1556,10 +1561,36 @@
             const motion = document.getElementById('reduced-motion-toggle'); if(motion) motion.checked=savedMotion;
         });
 
-        function openGame(title, url) {
-            document.getElementById('game-viewer-title').innerHTML = title.includes('Proxy') ? `<i class="fa-solid fa-globe"></i> ${title}` : `<i class="fa-solid fa-gamepad"></i> ${title}`;
-            document.getElementById('game-iframe').src = url;
+        let currentGameData = {title:'', url:'', cover:''};
+        function openGame(title, url, cover='') {
+            currentGameData = {title, url, cover};
+            const titleEl=document.getElementById('game-viewer-title');
+            if(titleEl){
+              titleEl.innerHTML = `<span class="gv-game-brand">${cover?`<img src="${cover}" alt="">`:''}</span><span class="gv-game-title-text"><i class="fa-solid fa-gamepad"></i> ${String(title).replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`;
+            }
+            const iframe=document.getElementById('game-iframe');
+            const loading=document.getElementById('game-load-status');
+            if(loading){loading.classList.add('show'); loading.querySelector('.gv-loading-title').textContent='Loading '+title; loading.querySelector('.gv-loading-sub').textContent='Preparing the game…';}
             document.getElementById('game-viewer-overlay').style.display = 'flex';
+            iframe.src = 'about:blank';
+            // Prefer loading the HTML as a same-origin blob so its relative assets and <base> tags work inside the viewer.
+            fetch(url, {cache:'no-store'})
+              .then(r=>{if(!r.ok) throw new Error('Game file returned '+r.status); return r.text();})
+              .then(html=>{
+                 let doc=html;
+                 if(!/<base\s/i.test(doc) && /<head[\s>]/i.test(doc)) doc=doc.replace(/<head([^>]*)>/i,'<head$1><base href="'+url.replace(/"/g,'&quot;')+'">');
+                 const blob=new Blob([doc],{type:'text/html'});
+                 if(window._grassGameBlobUrl) URL.revokeObjectURL(window._grassGameBlobUrl);
+                 window._grassGameBlobUrl=URL.createObjectURL(blob);
+                 iframe.src=window._grassGameBlobUrl;
+                 iframe.dataset.source=url;
+                 if(loading){loading.classList.remove('show');}
+              })
+              .catch(err=>{
+                 console.warn('Blob game load failed, falling back to direct URL',err);
+                 iframe.src=url; iframe.dataset.source=url;
+                 if(loading){ loading.classList.add('show'); loading.querySelector('.gv-loading-title').textContent='Opening game'; loading.querySelector('.gv-loading-sub').textContent='Using the direct game file…'; setTimeout(()=>loading.classList.remove('show'),1800);}
+              });
         }
 
         function closeGame() {
@@ -1574,8 +1605,7 @@
         }
 
         function reloadGame() {
-            const iframe = document.getElementById('game-iframe');
-            iframe.src = iframe.src;
+            if(currentGameData.url){ openGame(currentGameData.title,currentGameData.url,currentGameData.cover); }
         }
 
         function toggleFullscreenGame() {
@@ -1771,19 +1801,44 @@
     if(s) s.textContent=label;
     if(c) c.textContent=`${count} ${count===1?'game':'games'}`;
   }
+  function coverCandidates(g){
+    const id=String(g.id);
+    const list=[];
+    if(g.cover) list.push(String(g.cover));
+    if(id) {
+      list.push(`https://raw.githubusercontent.com/gn-math/covers/main/${id}.png`);
+      list.push(`https://cdn.jsdelivr.net/gh/gn-math/covers@main/${id}.png`);
+    }
+    return [...new Set(list)];
+  }
+  function escJs(v){ return String(v ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/[\r\n]/g, ' '); }
   function render(games){
     const el=grid(); if(!el)return;
     setStatus('Grass catalog',games.length);
     if(!games.length){el.innerHTML='<div class="games-empty">No games found.</div>';return;}
-    el.innerHTML=games.map(g=>`<button class="card grass-library-card" data-title="${esc(g.name)}" data-url="${esc(g.html)}" onclick="openGame('${esc(g.name)}','${esc(g.html)}')">
-      <div class="card-img grass-game-img">
-        <img src="${esc(g.cover||'')}" alt="${esc(g.name)}" loading="lazy" onerror="this.style.display='none';">
-        <span class="grass-game-badge">${esc(g.category||'Game')}</span>
-        <span class="grass-game-open" aria-hidden="true"><i class="fa-solid fa-play"></i></span>
-      </div>
-      <div class="card-info"><div class="card-title">${esc(g.name)}</div><div class="card-category">${esc(g.category||'Game')}</div></div>
-    </button>`).join('');
+    el.innerHTML=games.map(g=>{
+      const covers=coverCandidates(g);
+      const firstCover=covers[0]||'';
+      return `<button class="card grass-library-card" data-title="${esc(g.name)}" data-url="${esc(g.html)}" onclick="openGame('${escJs(g.name)}','${escJs(g.html)}','${escJs(firstCover)}')">
+        <div class="card-img grass-game-img">
+          <div class="grass-game-loading"><span></span></div>
+          <img class="grass-cover-image" src="${esc(firstCover)}" alt="${esc(g.name)} cover" loading="lazy" decoding="async" data-candidates='${esc(JSON.stringify(covers))}' onload="this.parentElement.classList.add('cover-ready');this.previousElementSibling.style.display='none'" onerror="window.grassCoverFallback(this)">
+          <div class="grass-cover-shade"></div>
+          <span class="grass-game-badge">${esc(g.category||'Game')}</span>
+          <span class="grass-game-open" aria-hidden="true"><i class="fa-solid fa-play"></i></span>
+        </div>
+        <div class="card-info"><div class="card-title">${esc(g.name)}</div><div class="card-category">${esc(g.category||'Game')}</div></div>
+      </button>`;
+    }).join('');
   }
+  window.grassCoverFallback=function(img){
+    try{
+      const arr=JSON.parse(img.dataset.candidates||'[]');
+      const next=(Number(img.dataset.coverIndex||0)+1);
+      if(next<arr.length){img.dataset.coverIndex=String(next); img.src=arr[next];}
+      else{img.style.display='none'; img.parentElement.classList.add('cover-missing');}
+    }catch(e){img.style.display='none';}
+  };
   async function load(){
     const el=grid(); if(el) el.innerHTML='<div class="games-loading">Loading games…</div>';
     try{
@@ -1824,3 +1879,29 @@
 </body>
 </html>
 
+
+<style id="grass-game-fix">
+.grass-game-img{position:relative!important;overflow:hidden!important;background:#11151d!important;}
+.grass-cover-image{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;display:block!important;z-index:0!important;opacity:1!important;visibility:visible!important;}
+.grass-cover-shade{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(8,10,14,.04) 35%,rgba(8,10,14,.78) 100%);pointer-events:none;}
+.grass-game-img.cover-missing:before{content:'Cover unavailable';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#6f7784;font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;z-index:2;}
+.grass-game-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;background:linear-gradient(135deg,#141821,#0e1015);}
+.grass-game-loading span{width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,.12);border-top-color:var(--accent);animation:grassSpin .8s linear infinite;}
+.grass-game-img.cover-ready .grass-game-loading{display:none;}
+@keyframes grassSpin{to{transform:rotate(360deg)}}
+.grass-library-card{overflow:hidden!important;}
+.grass-game-open{pointer-events:none!important;}
+.gv-left h3{gap:10px!important;}
+.gv-game-brand{width:38px;height:38px;border-radius:9px;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;background:#151922;border:1px solid rgba(255,255,255,.08);flex:none;}
+.gv-game-brand img{width:100%;height:100%;object-fit:cover;display:block;}
+.gv-game-title-text{display:inline-flex;align-items:center;gap:10px;min-width:0;}
+.game-load-status{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);z-index:20;display:none;flex-direction:column;align-items:center;gap:10px;padding:18px 24px;border-radius:14px;background:rgba(17,19,26,.92);border:1px solid rgba(255,255,255,.08);box-shadow:0 18px 50px rgba(0,0,0,.35);pointer-events:none;min-width:230px;text-align:center;}
+.game-load-status.show{display:flex;}
+.gv-spinner{width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.12);border-top-color:var(--accent);animation:grassSpin .75s linear infinite;}
+.gv-loading-title{font-weight:800;color:#fff;font-size:.92rem;}
+.gv-loading-sub{color:#8b929e;font-size:.76rem;}
+#game-iframe{background:#0b0d11!important;}
+</style>
+<script>
+window.addEventListener('beforeunload',()=>{if(window._grassGameBlobUrl) URL.revokeObjectURL(window._grassGameBlobUrl);});
+</script>
