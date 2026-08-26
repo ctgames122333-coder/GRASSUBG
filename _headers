@@ -1,0 +1,5 @@
+/html-main/*
+  Content-Security-Policy: frame-ancestors https://ctgames122333-coder.github.io
+
+/assets-main/*
+  Access-Control-Allow-Origin: *
