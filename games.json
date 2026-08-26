@@ -1,92 +1,282 @@
 [
   {
-    "id": 0,
-    "name": "Game 0",
-    "html": "https://jolly-kangaroo-911b90.netlify.app/html-main/0.html",
-    "cover": "https://jolly-kangaroo-911b90.netlify.app/covers-main/0.png",
-    "assets": "https://jolly-kangaroo-911b90.netlify.app/assets-main/0/",
-    "hasCover": true,
-    "hasAssets": false
-  },
-  {
     "id": 1,
-    "name": "Game 1",
-    "html": "https://jolly-kangaroo-911b90.netlify.app/html-main/1.html",
-    "cover": "https://jolly-kangaroo-911b90.netlify.app/covers-main/1.png",
-    "assets": "https://jolly-kangaroo-911b90.netlify.app/assets-main/1/",
-    "hasCover": true,
-    "hasAssets": false
+    "name": "OvO",
+    "category": "Platformer",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/1-fde.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/1.png",
+    "hasCover": true
   },
   {
     "id": 2,
-    "name": "Game 2",
-    "html": "https://jolly-kangaroo-911b90.netlify.app/html-main/2.html",
-    "cover": "https://jolly-kangaroo-911b90.netlify.app/covers-main/2.png",
-    "assets": "https://jolly-kangaroo-911b90.netlify.app/assets-main/2/",
-    "hasCover": true,
-    "hasAssets": false
+    "name": "OvO 2",
+    "category": "Platformer",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/2e.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/2.png",
+    "hasCover": true
   },
   {
     "id": 3,
-    "name": "Game 3",
-    "html": "https://jolly-kangaroo-911b90.netlify.app/html-main/3.html",
-    "cover": "https://jolly-kangaroo-911b90.netlify.app/covers-main/3.png",
-    "assets": "https://jolly-kangaroo-911b90.netlify.app/assets-main/3/",
-    "hasCover": true,
-    "hasAssets": false
+    "name": "OvO 3 Dimensions",
+    "category": "Platformer",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/3.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/3.png",
+    "hasCover": true
   },
   {
     "id": 4,
-    "name": "Game 4",
-    "html": "https://jolly-kangaroo-911b90.netlify.app/html-main/4.html",
-    "cover": "https://jolly-kangaroo-911b90.netlify.app/covers-main/4.png",
-    "assets": "https://jolly-kangaroo-911b90.netlify.app/assets-main/4/",
-    "hasCover": true,
-    "hasAssets": false
+    "name": "Gladihoppers",
+    "category": "Action",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/4.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/4.png",
+    "hasCover": true
   },
   {
     "id": 5,
-    "name": "Game 5",
-    "html": "https://jolly-kangaroo-911b90.netlify.app/html-main/5.html",
-    "cover": "https://jolly-kangaroo-911b90.netlify.app/covers-main/5.png",
-    "assets": "https://jolly-kangaroo-911b90.netlify.app/assets-main/5/",
-    "hasCover": true,
-    "hasAssets": false
+    "name": "Ice Dodo",
+    "category": "Arcade",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/5.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/5.png",
+    "hasCover": true
   },
   {
     "id": 6,
-    "name": "Game 6",
-    "html": "https://jolly-kangaroo-911b90.netlify.app/html-main/6.html",
-    "cover": "https://jolly-kangaroo-911b90.netlify.app/covers-main/6.png",
-    "assets": "https://jolly-kangaroo-911b90.netlify.app/assets-main/6/",
-    "hasCover": true,
-    "hasAssets": false
+    "name": "Block Blast",
+    "category": "Puzzle",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/6.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/6.png",
+    "hasCover": true
   },
   {
     "id": 7,
-    "name": "Game 7",
-    "html": "https://jolly-kangaroo-911b90.netlify.app/html-main/7.html",
-    "cover": "https://jolly-kangaroo-911b90.netlify.app/covers-main/7.png",
-    "assets": "https://jolly-kangaroo-911b90.netlify.app/assets-main/7/",
-    "hasCover": true,
-    "hasAssets": false
+    "name": "Jetpack Joyride",
+    "category": "Arcade",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/7.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/7.png",
+    "hasCover": true
+  },
+  {
+    "id": 8,
+    "name": "Friday Night Funkin",
+    "category": "Rhythm",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/8-wow.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/8.png",
+    "hasCover": true
   },
   {
     "id": 9,
-    "name": "Game 9",
-    "html": "https://jolly-kangaroo-911b90.netlify.app/html-main/9.html",
-    "cover": "https://jolly-kangaroo-911b90.netlify.app/covers-main/9.png",
-    "assets": "https://jolly-kangaroo-911b90.netlify.app/assets-main/9/",
-    "hasCover": true,
-    "hasAssets": false
+    "name": "Sprunki",
+    "category": "Music",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/9.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/9.png",
+    "hasCover": true
   },
   {
     "id": 10,
-    "name": "Game 10",
-    "html": "https://jolly-kangaroo-911b90.netlify.app/html-main/10.html",
-    "cover": "https://jolly-kangaroo-911b90.netlify.app/covers-main/10.png",
-    "assets": "https://jolly-kangaroo-911b90.netlify.app/assets-main/10/",
-    "hasCover": true,
-    "hasAssets": false
+    "name": "Temple Run 2",
+    "category": "Runner",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/10.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/10.png",
+    "hasCover": true
+  },
+  {
+    "id": 11,
+    "name": "Stickman Hook",
+    "category": "Arcade",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/11.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/11.png",
+    "hasCover": true
+  },
+  {
+    "id": 13,
+    "name": "Attack Hole",
+    "category": "Arcade",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/13.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/13.png",
+    "hasCover": true
+  },
+  {
+    "id": 14,
+    "name": "Bridge Race",
+    "category": "Racing",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/14.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/14.png",
+    "hasCover": true
+  },
+  {
+    "id": 15,
+    "name": "Color Water Sort 3D",
+    "category": "Puzzle",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/15.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/15.png",
+    "hasCover": true
+  },
+  {
+    "id": 16,
+    "name": "Hide N Seek",
+    "category": "Casual",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/16.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/16.png",
+    "hasCover": true
+  },
+  {
+    "id": 17,
+    "name": "Magic Tiles 3",
+    "category": "Music",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/17.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/17.png",
+    "hasCover": true
+  },
+  {
+    "id": 18,
+    "name": "Stacky Dash",
+    "category": "Arcade",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/18.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/18.png",
+    "hasCover": true
+  },
+  {
+    "id": 19,
+    "name": "Supreme Duelist",
+    "category": "Arcade",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/19.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/19.png",
+    "hasCover": true
+  },
+  {
+    "id": 20,
+    "name": "Tall Man Run",
+    "category": "Runner",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/20a.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/20.png",
+    "hasCover": true
+  },
+  {
+    "id": 21,
+    "name": "Turbo Stars",
+    "category": "Racing",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/21.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/21.png",
+    "hasCover": true
+  },
+  {
+    "id": 23,
+    "name": "Pou",
+    "category": "Casual",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/23.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/23.png",
+    "hasCover": true
+  },
+  {
+    "id": 24,
+    "name": "Crossy Road",
+    "category": "Arcade",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/24.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/24.png",
+    "hasCover": true
+  },
+  {
+    "id": 25,
+    "name": "Basket Battle",
+    "category": "Sports",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/25.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/25.png",
+    "hasCover": true
+  },
+  {
+    "id": 26,
+    "name": "Amaze",
+    "category": "Puzzle",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/26.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/26.png",
+    "hasCover": true
+  },
+  {
+    "id": 27,
+    "name": "Geometry Dash Lite",
+    "category": "Rhythm",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/27-f.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/27.png",
+    "hasCover": true
+  },
+  {
+    "id": 28,
+    "name": "Basketball FRVR",
+    "category": "Sports",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/28.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/28.png",
+    "hasCover": true
+  },
+  {
+    "id": 30,
+    "name": "Bottle Jump 3D",
+    "category": "Arcade",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/30.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/30.png",
+    "hasCover": true
+  },
+  {
+    "id": 31,
+    "name": "Color Match",
+    "category": "Puzzle",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/31.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/31.png",
+    "hasCover": true
+  },
+  {
+    "id": 32,
+    "name": "Dig Deep",
+    "category": "Casual",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/32.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/32.png",
+    "hasCover": true
+  },
+  {
+    "id": 33,
+    "name": "Retro Bowl",
+    "category": "Sports",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/33.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/33.png",
+    "hasCover": true
+  },
+  {
+    "id": 34,
+    "name": "Retro Bowl College",
+    "category": "Sports",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/34-fixed.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/34.png",
+    "hasCover": true
+  },
+  {
+    "id": 36,
+    "name": "Monster Tracks",
+    "category": "Racing",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/36.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/36.png",
+    "hasCover": true
+  },
+  {
+    "id": 37,
+    "name": "Gobble",
+    "category": "Puzzle",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/37.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/37.png",
+    "hasCover": true
+  },
+  {
+    "id": 42,
+    "name": "Road of Fury",
+    "category": "Racing",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/42.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/42.png",
+    "hasCover": true
+  },
+  {
+    "id": 43,
+    "name": "Driven Wild",
+    "category": "Racing",
+    "html": "https://cdn.jsdelivr.net/gh/gn-math/html@main/43.html",
+    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/43.png",
+    "hasCover": true
   }
 ]
