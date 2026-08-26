@@ -1,0 +1,16 @@
+# Add one permitted GN Math numeric game ID per line.
+# These are starter entries only; the importer downloads only explicit IDs.
+1
+2
+3
+5
+6
+7
+15
+18
+24
+31
+33
+34
+36
+37
