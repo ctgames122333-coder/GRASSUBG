@@ -1077,8 +1077,9 @@
             </section>
 
             <section id="games" class="tab-content">
-                <div class="section-header"><h2 class="page-title">Games</h2><div class="tab-search"><i class="fa-solid fa-magnifying-glass"></i><input id="games-search" type="text" placeholder="Search games..." onkeyup="filterCards('games-grid', this.value)"></div></div>
-                <div class="grid-container" id="games-grid"></div>
+                <div class="section-header games-header"><div><h2 class="page-title">Games</h2><div class="games-subtitle" id="games-library-status">Loading library…</div></div><div class="tab-search"><i class="fa-solid fa-magnifying-glass"></i><input id="games-search" type="text" placeholder="Search games..." onkeyup="filterCards('games-grid', this.value)"></div></div>
+                <div class="games-toolbar"><div class="games-chip"><i class="fa-solid fa-database"></i><span id="games-count">0 games</span></div><button class="games-refresh" type="button" onclick="window.grassReloadGames && window.grassReloadGames()"><i class="fa-solid fa-rotate"></i> Refresh</button></div>
+                <div class="grid-container games-grid-polished" id="games-grid"></div>
             </section>
 
             <section id="apps" class="tab-content">
@@ -1738,6 +1739,29 @@
         }
         animateParticles();
     </script>
+<style id="grass-games-polish">
+.games-header{align-items:flex-end!important;}
+.games-subtitle{margin-top:4px;color:#666b75;font-size:.78rem;font-weight:600;}
+.games-toolbar{display:flex;align-items:center;justify-content:space-between;padding:0 44px 10px;gap:12px;}
+.games-chip{display:inline-flex;align-items:center;gap:8px;color:#8f96a3;background:#11131a;border:1px solid rgba(255,255,255,.07);padding:8px 11px;border-radius:999px;font-size:.76rem;font-weight:700;}
+.games-chip i{color:var(--accent);font-size:.72rem;}
+.games-refresh{border:1px solid rgba(255,255,255,.08);background:#11131a;color:#b9bec8;border-radius:10px;padding:8px 11px;font-weight:700;font-size:.75rem;display:inline-flex;align-items:center;gap:7px;transition:.2s ease;}
+.games-refresh:hover{color:#fff;border-color:rgba(var(--accent-rgb),.3);transform:translateY(-1px);}
+.games-grid-polished{padding-top:6px!important;}
+.grass-library-card{height:270px!important;border-radius:16px!important;background:#11131a!important;border:1px solid rgba(255,255,255,.07)!important;overflow:hidden!important;position:relative!important;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease!important;}
+.grass-library-card:hover{transform:translateY(-4px)!important;border-color:rgba(var(--accent-rgb),.28)!important;box-shadow:0 18px 38px rgba(0,0,0,.28)!important;}
+.grass-game-img{height:182px!important;position:relative!important;overflow:hidden!important;background:linear-gradient(135deg,#141821,#0f1117)!important;}
+.grass-game-img img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;display:block!important;z-index:0!important;transform:none!important;transition:none!important;}
+.grass-game-img::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,7,10,.02) 34%,rgba(5,7,10,.68) 100%);z-index:1;pointer-events:none;}
+.grass-game-badge{position:absolute;top:10px;left:10px;z-index:3;background:rgba(10,12,16,.78);border:1px solid rgba(255,255,255,.09);backdrop-filter:blur(8px);padding:5px 8px;border-radius:8px;color:#d8dbe2;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;}
+.grass-game-open{position:absolute;right:10px;bottom:10px;z-index:3;width:38px;height:38px;border-radius:11px;border:1px solid rgba(255,255,255,.12);background:rgba(9,11,14,.8);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(0,0,0,.28);opacity:0;transform:translateY(4px);transition:.2s ease;pointer-events:none;}
+.grass-library-card:hover .grass-game-open{opacity:1;transform:translateY(0);}
+.grass-library-card .card-info{padding:14px 16px!important;background:#11131a!important;}
+.grass-library-card .card-title{font-size:1rem!important;}
+.grass-library-card .card-category{margin-top:5px!important;color:#717782!important;}
+.games-grid-polished:empty::after{content:"Loading games…";display:block;grid-column:1/-1;color:#6d737d;text-align:center;padding:70px 20px;font-weight:700;}
+@media(max-width:900px){.games-toolbar{padding-left:24px;padding-right:24px;}.games-header{padding-left:24px!important;padding-right:24px!important;}}
+</style>
 <script id="grass-games-loader">
 (function () {
   const FALLBACK_GAMES = [];
@@ -1752,26 +1776,33 @@
       category:g.category || 'Game'
     })).filter(g=>g.html);
   }
+  function setStatus(text, count){
+    const status=document.getElementById('games-library-status');
+    const countEl=document.getElementById('games-count');
+    if(status) status.textContent=text;
+    if(countEl) countEl.textContent=(count ?? 0)+' '+((count??0)===1?'game':'games');
+  }
   function render(items){
     const el=grid(); if(!el) return;
     const games=normalize(items);
+    setStatus(`Loaded from games.json`, games.length);
     if(!games.length){
-      el.innerHTML='<div style="padding:60px 20px;color:#a1a1aa;text-align:center;grid-column:1/-1">No games found.</div>';
+      el.innerHTML='<div style="padding:60px 20px;color:#a1a1aa;text-align:center;grid-column:1/-1">No games found in games.json.</div>';
       return;
     }
     el.innerHTML=games.map(g=>`<button class="card catalog-card grass-library-card" data-title="${esc(g.name)}" onclick="openGame('${esc(g.name)}','${esc(g.html)}')">
       <div class="card-img grass-game-img">
-        ${g.cover ? `<img src="${esc(g.cover)}" alt="${esc(g.name)}" loading="lazy" onerror="this.style.display='none';">` : ''}
-        <div class="grass-game-shade"></div>
-        <div class="card-play-btn"><i class="fa-solid fa-play"></i></div>
+        ${g.cover ? `<img src="${esc(g.cover)}" alt="${esc(g.name)}" loading="lazy" onerror="this.closest('.grass-game-img').classList.add('cover-missing');this.remove();">` : ''}
+        <span class="grass-game-badge">${esc(g.category)}</span>
+        <span class="grass-game-open" aria-hidden="true"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
       </div>
-      <div class="card-info"><div class="card-title">${esc(g.name)}</div><div class="card-category">${esc(g.category)}</div></div>
+      <div class="card-info"><div class="card-title">${esc(g.name)}</div><div class="card-category">Game ${esc(g.id)}</div></div>
     </button>`).join('');
   }
   async function load(){
     try{
       const base = new URL('.', window.location.href);
-      const res = await fetch(new URL('games.json', base), {cache:'no-store'});
+      const res = await fetch(new URL('games.json?v=' + Date.now(), base), {cache:'no-store'});
       if(!res.ok) throw new Error(`games.json ${res.status}`);
       const json = await res.json();
       render(json);
@@ -1791,9 +1822,9 @@
     .grass-library-card:hover .grass-game-img img{transform:none!important;scale:1!important}
   `;
   document.head.appendChild(style);
+  window.grassReloadGames = load;
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',load,{once:true}); else load();
 })();
 </script>
 </body>
 </html>
-
