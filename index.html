@@ -1192,21 +1192,11 @@
             {name:'DeviantArt',category:'Art',url:'https://www.deviantart.com',icon:'fa-brands fa-deviantart',logo:'deviantart'},
             {name:'Tumblr',category:'Social',url:'https://www.tumblr.com',icon:'fa-brands fa-tumblr',logo:'tumblr'}
         ];
-        const GRASS_GAMES = [
-            {name:'Get Yoked',category:'Action',url:'Get Yoked.html'},
-            {name:'Slope Plus',category:'Arcade',url:'clslopeplus.html'},
-            {name:'Slice It All',category:'Casual',url:'clsliceitall.html'},
-            {name:'Sandbox City',category:'Open World',url:'clsandboxcity.html'},
-            {name:'OvO',category:'Platformer',url:'clovofixed.html'},
-            {name:'Basket Bros',category:'Sports',url:'clbasketbros.html'},
-            {name:'Archers',category:'Skill',url:'clarch.html'},
-            {name:'City Defense',category:'Strategy',url:'City Defense.html'}
-        ];
+
         function escAttr(v){return String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,"&#39;");}
         function renderCatalogs(){
             const apps=document.getElementById('apps-grid'), games=document.getElementById('games-grid');
             if(apps) apps.innerHTML=GRASS_APPS.map(a=>`<button class="card catalog-card" data-title="${escAttr(a.name)}" onclick="openProxy('${escAttr(a.url)}')"><div class="card-img catalog-icon-area"><div class="card-overlay"></div><div class="card-play-btn"><i class="fa-solid fa-arrow-up-right-from-square"></i></div><span class="catalog-logo-wrap"><img class="catalog-logo" src="https://cdn.simpleicons.org/${escAttr(a.logo)}" alt="${escAttr(a.name)}" onerror="this.style.display='none';"></span></div><div class="card-info"><div class="card-title">${escAttr(a.name)}</div><div class="card-category">${escAttr(a.category)} · Proxy</div></div></button>`).join('');
-            if(games) games.innerHTML=GRASS_GAMES.map(g=>`<button class="card" data-title="${escAttr(g.name)}" onclick="openGame('${escAttr(g.name)}','${escAttr(g.url)}')"><div class="card-img"><div class="card-overlay"></div><div class="card-play-btn"><i class="fa-solid fa-play"></i></div></div><div class="card-info"><div class="card-title">${escAttr(g.name)}</div><div class="card-category">${escAttr(g.category)}</div></div></button>`).join('');
         }
 
         // CORE LOGIC
@@ -1750,18 +1740,7 @@
     </script>
 <script id="grass-games-loader">
 (function () {
-  const FALLBACK_GAMES = [
-    {id:0,name:'Game 0',html:'https://jolly-kangaroo-911b90.netlify.app/html-main/0.html',cover:'https://jolly-kangaroo-911b90.netlify.app/covers-main/0.png'},
-    {id:1,name:'Game 1',html:'https://jolly-kangaroo-911b90.netlify.app/html-main/1.html',cover:'https://jolly-kangaroo-911b90.netlify.app/covers-main/1.png'},
-    {id:2,name:'Game 2',html:'https://jolly-kangaroo-911b90.netlify.app/html-main/2.html',cover:'https://jolly-kangaroo-911b90.netlify.app/covers-main/2.png'},
-    {id:3,name:'Game 3',html:'https://jolly-kangaroo-911b90.netlify.app/html-main/3.html',cover:'https://jolly-kangaroo-911b90.netlify.app/covers-main/3.png'},
-    {id:4,name:'Game 4',html:'https://jolly-kangaroo-911b90.netlify.app/html-main/4.html',cover:'https://jolly-kangaroo-911b90.netlify.app/covers-main/4.png'},
-    {id:5,name:'Game 5',html:'https://jolly-kangaroo-911b90.netlify.app/html-main/5.html',cover:'https://jolly-kangaroo-911b90.netlify.app/covers-main/5.png'},
-    {id:6,name:'Game 6',html:'https://jolly-kangaroo-911b90.netlify.app/html-main/6.html',cover:'https://jolly-kangaroo-911b90.netlify.app/covers-main/6.png'},
-    {id:7,name:'Game 7',html:'https://jolly-kangaroo-911b90.netlify.app/html-main/7.html',cover:'https://jolly-kangaroo-911b90.netlify.app/covers-main/7.png'},
-    {id:9,name:'Game 9',html:'https://jolly-kangaroo-911b90.netlify.app/html-main/9.html',cover:'https://jolly-kangaroo-911b90.netlify.app/covers-main/9.png'},
-    {id:10,name:'Game 10',html:'https://jolly-kangaroo-911b90.netlify.app/html-main/10.html',cover:'https://jolly-kangaroo-911b90.netlify.app/covers-main/10.png'}
-  ];
+  const FALLBACK_GAMES = [];
   const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const grid = () => document.getElementById('games-grid');
   function normalize(items){
@@ -1797,8 +1776,9 @@
       const json = await res.json();
       render(json);
     }catch(err){
-      console.warn('Grass game library fallback:', err);
-      render(FALLBACK_GAMES);
+      console.error('Grass game library failed to load:', err);
+      const el=grid();
+      if(el) el.innerHTML='<div style="padding:60px 20px;color:#fda4af;text-align:center;grid-column:1/-1"><strong>games.json could not be loaded.</strong><br><span style="color:#a1a1aa;font-size:.9rem">Check that games.json is in the same folder as index.html.</span></div>';
     }
   }
   const style=document.createElement('style');
