@@ -1748,6 +1748,71 @@
         }
         animateParticles();
     </script>
+<script id="grass-games-loader">
+(function () {
+  const FALLBACK_GAMES = [
+    {id:0,name:'Game 0',html:'https://jolly-kangaroo-911b90.netlify.app/html-main/0.html',cover:'https://jolly-kangaroo-911b90.netlify.app/covers-main/0.png'},
+    {id:1,name:'Game 1',html:'https://jolly-kangaroo-911b90.netlify.app/html-main/1.html',cover:'https://jolly-kangaroo-911b90.netlify.app/covers-main/1.png'},
+    {id:2,name:'Game 2',html:'https://jolly-kangaroo-911b90.netlify.app/html-main/2.html',cover:'https://jolly-kangaroo-911b90.netlify.app/covers-main/2.png'},
+    {id:3,name:'Game 3',html:'https://jolly-kangaroo-911b90.netlify.app/html-main/3.html',cover:'https://jolly-kangaroo-911b90.netlify.app/covers-main/3.png'},
+    {id:4,name:'Game 4',html:'https://jolly-kangaroo-911b90.netlify.app/html-main/4.html',cover:'https://jolly-kangaroo-911b90.netlify.app/covers-main/4.png'},
+    {id:5,name:'Game 5',html:'https://jolly-kangaroo-911b90.netlify.app/html-main/5.html',cover:'https://jolly-kangaroo-911b90.netlify.app/covers-main/5.png'},
+    {id:6,name:'Game 6',html:'https://jolly-kangaroo-911b90.netlify.app/html-main/6.html',cover:'https://jolly-kangaroo-911b90.netlify.app/covers-main/6.png'},
+    {id:7,name:'Game 7',html:'https://jolly-kangaroo-911b90.netlify.app/html-main/7.html',cover:'https://jolly-kangaroo-911b90.netlify.app/covers-main/7.png'},
+    {id:9,name:'Game 9',html:'https://jolly-kangaroo-911b90.netlify.app/html-main/9.html',cover:'https://jolly-kangaroo-911b90.netlify.app/covers-main/9.png'},
+    {id:10,name:'Game 10',html:'https://jolly-kangaroo-911b90.netlify.app/html-main/10.html',cover:'https://jolly-kangaroo-911b90.netlify.app/covers-main/10.png'}
+  ];
+  const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const grid = () => document.getElementById('games-grid');
+  function normalize(items){
+    return (Array.isArray(items) ? items : []).map((g,i)=>({
+      id:g.id ?? i,
+      name:g.name || `Game ${g.id ?? i}`,
+      html:g.html || g.url || g.path || '',
+      cover:g.cover || g.image || '',
+      category:g.category || 'Game'
+    })).filter(g=>g.html);
+  }
+  function render(items){
+    const el=grid(); if(!el) return;
+    const games=normalize(items);
+    if(!games.length){
+      el.innerHTML='<div style="padding:60px 20px;color:#a1a1aa;text-align:center;grid-column:1/-1">No games found.</div>';
+      return;
+    }
+    el.innerHTML=games.map(g=>`<button class="card catalog-card grass-library-card" data-title="${esc(g.name)}" onclick="openGame('${esc(g.name)}','${esc(g.html)}')">
+      <div class="card-img grass-game-img">
+        ${g.cover ? `<img src="${esc(g.cover)}" alt="${esc(g.name)}" loading="lazy" onerror="this.style.display='none';">` : ''}
+        <div class="grass-game-shade"></div>
+        <div class="card-play-btn"><i class="fa-solid fa-play"></i></div>
+      </div>
+      <div class="card-info"><div class="card-title">${esc(g.name)}</div><div class="card-category">${esc(g.category)}</div></div>
+    </button>`).join('');
+  }
+  async function load(){
+    try{
+      const base = new URL('.', window.location.href);
+      const res = await fetch(new URL('games.json', base), {cache:'no-store'});
+      if(!res.ok) throw new Error(`games.json ${res.status}`);
+      const json = await res.json();
+      render(json);
+    }catch(err){
+      console.warn('Grass game library fallback:', err);
+      render(FALLBACK_GAMES);
+    }
+  }
+  const style=document.createElement('style');
+  style.textContent=`
+    .grass-library-card{overflow:hidden!important;min-width:0!important}
+    .grass-game-img{overflow:hidden!important;background:#11131a!important}
+    .grass-game-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:0;transition:none!important}
+    .grass-game-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.48));z-index:1;pointer-events:none}
+    .grass-library-card .card-play-btn{z-index:3!important}
+    .grass-library-card:hover .grass-game-img img{transform:none!important;scale:1!important}
+  `;
+  document.head.appendChild(style);
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',load,{once:true}); else load();
+})();
+</script>
 </body>
 </html>
-
