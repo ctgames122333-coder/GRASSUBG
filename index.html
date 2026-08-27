@@ -1020,11 +1020,13 @@
 
 <div id="main-app">
 
-        <div class="grass-nav-wrap" id="grass-nav-wrap" onmouseenter="openGrassNav()" onmouseleave="scheduleCloseGrassNav()">
-            <button class="grass-nav-orb" type="button" onclick="toggleGrassNav()" aria-label="Open Grass navigation" title="Open navigation">
-                <svg class="grass-nav-logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M6 21C6 21 6 13 2 9C6.5 10.5 8 16 8 21H6Z" opacity="0.6"/><path d="M12 22C12 22 12 8 18 2C15.5 8 13.5 14 13.5 22H12Z"/><path d="M18 21C18 21 19 14 23 11C19.5 13 19 17 19 21H18Z" opacity="0.4"/>
-                </svg>
+        <aside class="grass-nav-wrap" id="grass-nav-wrap" onmouseenter="openGrassNav()" onmouseleave="scheduleCloseGrassNav()">
+            <div class="grass-nav-brand" aria-label="Grass">
+                <span class="grass-nav-mark" aria-hidden="true"><i class="fa-solid fa-leaf"></i></span>
+                <span>grass<span>.</span></span>
+            </div>
+            <button class="grass-nav-orb" type="button" onclick="toggleGrassNav()" aria-label="Toggle navigation" title="Toggle navigation">
+                <i class="fa-solid fa-bars" aria-hidden="true"></i><span>Menu</span>
             </button>
             <div class="grass-nav-label">Grass menu</div>
             <div class="grass-nav-panel" id="grass-nav-panel">
@@ -1040,7 +1042,7 @@
                 <button class="nav-btn" onclick="switchTab('settings', this)"><i class="fa-solid fa-gear"></i><span>Settings</span></button>
 
             </div>
-        </div>
+        </aside>
 
         <main class="content-area">
             
@@ -1082,7 +1084,7 @@
             </section>
 
             <section id="games" class="tab-content">
-                <div class="section-header games-header"><div><h2 class="page-title">Games</h2><div class="games-subtitle" id="games-library-status">Loading library…</div></div><div class="tab-search"><i class="fa-solid fa-magnifying-glass"></i><input id="games-search" type="text" placeholder="Search games..." onkeyup="filterCards('games-grid', this.value)"></div></div>
+                <div class="section-header games-header"><div><h2 class="page-title">Games</h2><div class="games-subtitle" id="games-library-status">Loading library…</div></div><div class="tab-search"><i class="fa-solid fa-magnifying-glass"></i><input id="games-search" type="search" placeholder="Search games..." autocomplete="off"></div></div>
                 <div class="games-toolbar"><div class="games-chip"><i class="fa-solid fa-database"></i><span id="games-count">0 games</span></div><button class="games-refresh" type="button" onclick="window.grassReloadGames && window.grassReloadGames()"><i class="fa-solid fa-rotate"></i> Refresh</button></div>
                 <div class="grid-container games-grid-polished" id="games-grid"></div>
             </section>
@@ -1795,6 +1797,11 @@
 <script id="grass-games-loader">
 (function(){
   const grid=()=>document.getElementById('games-grid');
+  const pageSize=30;
+  let catalog=[];
+  let filtered=[];
+  let rendered=0;
+  let observer;
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function setStatus(label,count){
     const s=document.getElementById('games-library-status'), c=document.getElementById('games-count');
@@ -1812,11 +1819,7 @@
     return [...new Set(list)];
   }
   function escJs(v){ return String(v ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/[\r\n]/g, ' '); }
-  function render(games){
-    const el=grid(); if(!el)return;
-    setStatus('Grass catalog',games.length);
-    if(!games.length){el.innerHTML='<div class="games-empty">No games found.</div>';return;}
-    el.innerHTML=games.map(g=>{
+  function card(g){
       const covers=coverCandidates(g);
       const firstCover=covers[0]||'';
       return `<button class="card grass-library-card" data-title="${esc(g.name)}" data-url="${esc(g.html)}" onclick="openGame('${escJs(g.name)}','${escJs(g.html)}','${escJs(firstCover)}')">
@@ -1829,7 +1832,39 @@
         </div>
         <div class="card-info"><div class="card-title">${esc(g.name)}</div><div class="card-category">${esc(g.category||'Game')}</div></div>
       </button>`;
-    }).join('');
+  }
+  function disconnectObserver(){ if(observer){observer.disconnect();observer=null;} }
+  function renderNext(){
+    const el=grid(); if(!el || rendered>=filtered.length)return;
+    const sentinel=el.querySelector('.games-sentinel'); if(sentinel) sentinel.remove();
+    const next=filtered.slice(rendered, rendered+pageSize);
+    el.insertAdjacentHTML('beforeend',next.map(card).join(''));
+    rendered+=next.length;
+    if(rendered<filtered.length){
+      const marker=document.createElement('div');
+      marker.className='games-sentinel'; marker.setAttribute('aria-label','Load more games');
+      marker.innerHTML='<span></span><small>Loading more games</small>';
+      el.appendChild(marker);
+      observer=new IntersectionObserver(entries=>{if(entries.some(entry=>entry.isIntersecting)){disconnectObserver();renderNext();}}, {root:document.querySelector('.content-area'),rootMargin:'520px 0px'});
+      observer.observe(marker);
+    }
+  }
+  function render(games){
+    const el=grid(); if(!el)return;
+    disconnectObserver(); filtered=games; rendered=0;
+    setStatus('Grass catalog',games.length);
+    el.innerHTML='';
+    if(!games.length){el.innerHTML='<div class="games-empty">No games found.</div>';return;}
+    renderNext();
+  }
+  function filter(query){
+    const term=String(query||'').trim().toLowerCase();
+    const matches=term ? catalog.filter(game=>String(game.name||'').toLowerCase().includes(term)) : catalog;
+    setStatus(term ? `${matches.length} matching games` : 'Grass catalog',matches.length);
+    const el=grid(); if(!el)return;
+    disconnectObserver(); filtered=matches; rendered=0; el.innerHTML='';
+    if(!matches.length){el.innerHTML='<div class="games-empty"><strong>No games found.</strong><br><span>Try a different title.</span></div>';return;}
+    renderNext();
   }
   window.grassCoverFallback=function(img){
     try{
@@ -1846,7 +1881,13 @@
       if(!res.ok) throw new Error(`games.json ${res.status}`);
       const json=await res.json();
       if(!Array.isArray(json)) throw new Error('games.json is not an array');
-      render(json.filter(g=>g && g.name && g.html));
+      catalog=json.filter(g=>g && g.name && g.html);
+      const search=document.getElementById('games-search');
+      render(catalog);
+      if(search && !search.dataset.bound){
+        search.dataset.bound='true';
+        search.addEventListener('input',()=>filter(search.value));
+      }
     }catch(err){
       console.error(err);
       setStatus('Catalog error',0);
@@ -1854,6 +1895,7 @@
     }
   }
   window.grassReloadGames=load;
+  window.grassFilterGames=filter;
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',load,{once:true}); else load();
 })();
 </script>
@@ -1905,3 +1947,24 @@
 <script>
 window.addEventListener('beforeunload',()=>{if(window._grassGameBlobUrl) URL.revokeObjectURL(window._grassGameBlobUrl);});
 </script>
+<style id="grass-unified-ui">
+/* Unified desktop shell */
+:root{--panel:#101216;--panel-raised:#15181e;--line:rgba(255,255,255,.085);--muted:#8b929e;}
+#main-app{background:#090b0e!important;}
+.grass-nav-wrap{position:fixed!important;inset:0 auto 0 0!important;width:238px!important;min-height:100vh!important;padding:26px 14px!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;background:rgba(12,14,18,.92)!important;border-right:1px solid var(--line)!important;box-shadow:18px 0 50px rgba(0,0,0,.18)!important;backdrop-filter:blur(24px)!important;z-index:100!important;}
+.grass-nav-brand{display:flex;align-items:center;gap:10px;padding:0 11px 26px;color:#f7f8fa;font-size:1.38rem;font-weight:900;letter-spacing:-.07em;}
+.grass-nav-brand>span:last-child span{color:var(--accent);}.grass-nav-mark{display:grid;place-items:center;width:33px;height:33px;border-radius:11px;background:rgba(var(--accent-rgb),.14);color:var(--accent);font-size:.94rem;box-shadow:inset 0 0 0 1px rgba(var(--accent-rgb),.14);}
+.grass-nav-orb{display:none!important;}.grass-nav-label{display:none!important;}
+.grass-nav-panel{position:static!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;transform:none!important;width:100%!important;max-height:none!important;overflow:visible!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;}
+.grass-nav-title{padding:0 11px 9px!important;color:#5f6774!important;font-size:.63rem!important;}
+.nav-btn{min-height:45px!important;margin:3px 0!important;padding:11px 12px!important;border-radius:11px!important;color:#929aa6!important;font-size:.88rem!important;}
+.nav-btn i{color:#747c88!important;}.nav-btn:hover{transform:none!important;background:rgba(255,255,255,.055)!important;color:#fff!important;}.nav-btn.active{background:linear-gradient(90deg,rgba(var(--accent-rgb),.16),rgba(var(--accent-rgb),.045))!important;border-color:rgba(var(--accent-rgb),.18)!important;box-shadow:none!important;}.nav-btn.active i,.nav-btn:hover i{color:var(--accent)!important;text-shadow:none!important;transform:none!important;}.nav-spacer{margin:12px 7px!important;}
+.content-area{width:calc(100% - 238px)!important;height:100vh!important;margin-left:238px!important;background:radial-gradient(circle at 76% -10%,rgba(var(--accent-rgb),.08),transparent 24%),#0b0d11!important;}
+.section-header{padding:48px 52px 0!important;margin-bottom:24px!important;}.page-title{font-size:clamp(2.25rem,4vw,3.4rem)!important;letter-spacing:-.055em!important;}.games-subtitle{color:var(--muted)!important;font-size:.84rem!important;}.tab-search input{border-radius:13px!important;background:var(--panel)!important;border-color:var(--line)!important;}.tab-search input:focus{box-shadow:0 0 0 4px rgba(var(--accent-rgb),.1)!important;}
+.games-toolbar{padding:0 52px 15px!important;}.games-chip,.games-refresh{background:var(--panel)!important;border-color:var(--line)!important;color:#aeb5c0!important;}.games-refresh{border-radius:11px!important;}.games-grid-polished{grid-template-columns:repeat(auto-fill,minmax(205px,1fr))!important;gap:16px!important;padding:6px 52px 56px!important;}
+.grass-library-card{height:268px!important;border-radius:14px!important;background:var(--panel)!important;box-shadow:none!important;}.grass-library-card:hover{transform:translateY(-3px)!important;box-shadow:0 16px 32px rgba(0,0,0,.26)!important;}.grass-game-img{height:178px!important;}.grass-library-card .card-info{padding:13px 14px!important;background:var(--panel)!important;}.grass-library-card .card-title{font-size:.94rem!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.grass-library-card .card-category{font-size:.72rem!important;}
+.games-sentinel{grid-column:1/-1;min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;color:#707887;font-size:.75rem;font-weight:700;letter-spacing:.03em;}.games-sentinel span{width:25px;height:25px;border-radius:50%;border:2px solid rgba(255,255,255,.11);border-top-color:var(--accent);animation:grassSpin .75s linear infinite;}
+.game-viewer-container{border:1px solid var(--line)!important;box-shadow:0 30px 90px rgba(0,0,0,.55)!important;}.game-viewer-header{background:var(--panel)!important;border-bottom-color:var(--line)!important;}
+@media(max-width:900px){.grass-nav-wrap{inset:auto 14px 14px 14px!important;width:auto!important;min-height:0!important;height:58px!important;padding:7px!important;flex-direction:row!important;align-items:center!important;border:1px solid var(--line)!important;border-radius:17px!important;box-shadow:0 16px 40px rgba(0,0,0,.35)!important;}.grass-nav-brand{padding:0 10px!important;font-size:1.1rem!important;}.grass-nav-mark{width:29px;height:29px;border-radius:9px;}.grass-nav-orb{display:flex!important;align-items:center!important;gap:7px;margin-left:auto!important;width:auto!important;height:42px!important;padding:0 12px!important;border-radius:11px!important;background:rgba(255,255,255,.06)!important;border:1px solid var(--line)!important;color:#fff!important;font-size:.78rem!important;font-weight:800!important;box-shadow:none!important;}.grass-nav-panel{position:absolute!important;left:0!important;right:0!important;bottom:68px!important;width:auto!important;max-height:min(68vh,500px)!important;overflow:auto!important;padding:9px!important;border:1px solid var(--line)!important;border-radius:17px!important;background:rgba(15,17,22,.98)!important;box-shadow:0 20px 60px rgba(0,0,0,.45)!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important;transform:translateY(8px)!important;}.grass-nav-wrap.is-open .grass-nav-panel{opacity:1!important;visibility:visible!important;pointer-events:auto!important;transform:none!important;}.content-area{width:100%!important;margin-left:0!important;padding-bottom:72px!important;}.section-header{padding:34px 22px 0!important;}.games-toolbar{padding:0 22px 14px!important;}.games-grid-polished{grid-template-columns:repeat(auto-fill,minmax(155px,1fr))!important;gap:12px!important;padding:5px 22px 44px!important;}.tab-search{width:min(100%,290px)!important;}.section-header{align-items:flex-start!important;gap:18px!important;flex-direction:column!important;}.grass-library-card{height:232px!important;}.grass-game-img{height:150px!important;}}
+@media(max-width:520px){.games-grid-polished{grid-template-columns:repeat(2,minmax(0,1fr))!important;padding-left:14px!important;padding-right:14px!important;}.section-header,.games-toolbar{padding-left:14px!important;padding-right:14px!important;}.grass-library-card .card-info{padding:10px!important;}.grass-library-card .card-title{font-size:.83rem!important;}.grass-game-badge{font-size:.57rem!important;}}
+</style>
