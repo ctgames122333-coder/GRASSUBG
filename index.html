@@ -1418,6 +1418,33 @@
 .games-empty strong{color:#fff!important;}
 @media(max-width:900px){.games-grid-polished{padding:8px 24px 32px!important;}}
 </style>
+<style id="grass-entrance-runtime-fix-v2">
+/* GRASS_ENTRANCE_RUNTIME_FIX_V2 */
+#cloak-screen > .entrance-screen.grass-entrance-visible { display:block !important; }
+</style>
+<script id="grass-entrance-runtime-fix-v2">
+(function(){
+  function showEntrance(){
+    var cloak=document.getElementById('cloak-screen');
+    if(!cloak)return;
+    var saved=localStorage.getItem('grass_entrance');
+    var choice=(saved==='ixl'||saved==='blooket') ? saved : 'blooket';
+    var screens={blooket:document.getElementById('entrance-blooket'),ixl:document.getElementById('entrance-ixl')};
+    Object.keys(screens).forEach(function(key){
+      var el=screens[key];
+      if(!el)return;
+      el.classList.toggle('grass-entrance-visible',key===choice);
+      el.setAttribute('aria-hidden',key===choice?'false':'true');
+    });
+    cloak.style.display='block';
+    cloak.style.visibility='visible';
+    cloak.style.opacity='1';
+    if(document.body) document.body.dataset.disguise=choice;
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',showEntrance,{once:true});
+  else showEntrance();
+})();
+</script>
 </body>
 </html>
 
