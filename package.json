@@ -1,0 +1,17 @@
+{
+  "name": "grassubg-local",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local Node.js server for GRASSUBG and its Ultraviolet frontend.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@tomphttp/bare-server-node": "2.0.6",
+    "express": "5.2.1"
+  }
+}
