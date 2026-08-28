@@ -2,27 +2,20 @@
 name: Deploy static content to Pages
 
 on:
-  # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  # Single deploy job since we're just deploying
   deploy:
     environment:
       name: github-pages
@@ -31,36 +24,70 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Fix Grass app overlay for deployment
+
+      - name: Repair entrance screen in source
         run: |
           python - <<'PY'
           from pathlib import Path
 
           path = Path("index.html")
           text = path.read_text(encoding="utf-8")
-          marker = "/* GRASS DEPLOYMENT FIX */"
 
+          marker = "GRASS_ENTRANCE_RUNTIME_FIX_V2"
           if marker not in text:
-              fix = """
-          <style id="grass-deployment-fix">
-          /* GRASS DEPLOYMENT FIX */
-          #cloak-screen { display: none !important; }
-          #main-app { display: flex !important; }
+              fix = r'''<style id="grass-entrance-runtime-fix-v2">
+          /* GRASS_ENTRANCE_RUNTIME_FIX_V2 */
+          #cloak-screen > .entrance-screen.grass-entrance-visible { display:block !important; }
           </style>
-          """
-              if "</head>" in text:
-                  text = text.replace("</head>", fix + "</head>", 1)
+          <script id="grass-entrance-runtime-fix-v2">
+          (function(){
+            function showEntrance(){
+              var cloak=document.getElementById('cloak-screen');
+              if(!cloak)return;
+              var saved=localStorage.getItem('grass_entrance');
+              var choice=(saved==='ixl'||saved==='blooket') ? saved : 'blooket';
+              var screens={blooket:document.getElementById('entrance-blooket'),ixl:document.getElementById('entrance-ixl')};
+              Object.keys(screens).forEach(function(key){
+                var el=screens[key];
+                if(!el)return;
+                el.classList.toggle('grass-entrance-visible',key===choice);
+                el.setAttribute('aria-hidden',key===choice?'false':'true');
+              });
+              cloak.style.display='block';
+              cloak.style.visibility='visible';
+              cloak.style.opacity='1';
+              if(document.body) document.body.dataset.disguise=choice;
+            }
+            if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',showEntrance,{once:true});
+            else showEntrance();
+          })();
+          </script>
+          '''
+              if "</body>" in text:
+                  text = text.replace("</body>", fix + "</body>", 1)
               else:
                   text += fix
               path.write_text(text, encoding="utf-8")
           PY
+
+      - name: Commit source repair if needed
+        run: |
+          if ! git diff --quiet -- index.html; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add index.html
+            git commit -m "Fix Grass entrance screen"
+            git push
+          fi
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
           path: '.'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
