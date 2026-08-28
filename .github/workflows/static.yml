@@ -33,6 +33,29 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      - name: Fix Grass app overlay for deployment
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("index.html")
+          text = path.read_text(encoding="utf-8")
+          marker = "/* GRASS DEPLOYMENT FIX */"
+
+          if marker not in text:
+              fix = """
+          <style id="grass-deployment-fix">
+          /* GRASS DEPLOYMENT FIX */
+          #cloak-screen { display: none !important; }
+          #main-app { display: flex !important; }
+          </style>
+          """
+              if "</head>" in text:
+                  text = text.replace("</head>", fix + "</head>", 1)
+              else:
+                  text += fix
+              path.write_text(text, encoding="utf-8")
+          PY
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
